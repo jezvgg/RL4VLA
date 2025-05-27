@@ -1,8 +1,11 @@
 # VLA-RL-Study: What Can RL Bring to VLA Generalization? An Empirical Study
 
+[![arXiv](https://img.shields.io/badge/arXiv-2505.19789-red.svg)](http://arxiv.org/abs/2505.19789)
+[![Website](https://img.shields.io/badge/Website-RLVLA-green.svg)](https://rlvla.github.io)
+
 ## Introduction
 
-This repository contains the code for the paper "What Can RL Bring to VLA Generalization? An Empirical Study".
+This repository contains the code for the paper [What Can RL Bring to VLA Generalization? An Empirical Study](https://arxiv.org/abs/2505.19789).
 
 ## Install
 
@@ -165,7 +168,7 @@ conda activate rlvla_env
 cd SimplerEnv
 
 #cuda="0,1" # env on GPU-0, model on GPU-1 (for 40G GPU)
-cuda="0" # env and model on the sane GPU (for 80G GPU)
+cuda="0" # env and model on the same GPU (for 80G GPU)
 
 CUDA_VISIBLE_DEVICES=$cuda XLA_PYTHON_CLIENT_PREALLOCATE=false PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True \
 python simpler_env/train_ms3_ppo.py \
