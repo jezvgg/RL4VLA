@@ -50,7 +50,7 @@ class ExampleDataset(tfds.core.GeneratorBasedBuilder):
         self.tasks = [
             {"name": "../../../SimplerEnv/octo_collect/PutCarrotOnPlateInScene-v1/75/data",
              "compressed": False, "filter": False},
-            {"name": "../../../ManiSkill/mp_collect/PutCarrotOnPlateInScene-v1/75/data",
+            {"name": "../../../ManiSkill/mp_collect/PutOnPlateInScene25Single-v1/75/data",
              "compressed": True, "filter": True},
         ]
 

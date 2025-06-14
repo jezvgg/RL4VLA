@@ -730,6 +730,91 @@ class PutOnPlateInScene25MainV3(PutOnPlateInScene25):
         self.quat_configs = quat_configs
 
 
+@register_env("PutOnPlateInScene25Single-v1", max_episode_steps=80, asset_download_ids=["bridge_v2_real2sim"])
+class PutOnPlateInScene25Single(PutOnPlateInScene25MainV3):
+    def _prep_init(self):
+        # models
+        self.model_db_carrot: dict[str, dict] = io_utils.load_json(
+            CARROT_DATASET_DIR / "more_carrot" / "model_db.json"
+        )
+        only_carrot_name = list(self.model_db_carrot.keys())[0]
+        self.model_db_carrot = {k: v for k, v in self.model_db_carrot.items() if k == only_carrot_name}
+        assert len(self.model_db_carrot) == 1
+
+        self.model_db_plate: dict[str, dict] = io_utils.load_json(
+            CARROT_DATASET_DIR / "more_plate" / "model_db.json"
+        )
+        only_plate_name = list(self.model_db_plate.keys())[0]
+        self.model_db_plate = {k: v for k, v in self.model_db_plate.items() if k == only_plate_name}
+        assert len(self.model_db_plate) == 1
+
+        # random configs
+        self.carrot_names = list(self.model_db_carrot.keys())
+        self.plate_names = list(self.model_db_plate.keys())
+
+        # rgb overlay
+        model_db_table = io_utils.load_json(
+            CARROT_DATASET_DIR / "more_table" / "model_db.json"
+        )
+        only_table_name = list(model_db_table.keys())[0]
+        model_db_table = {k: v for k, v in model_db_table.items() if k == only_table_name}
+        assert len(model_db_table) == 1
+
+        img_fd = CARROT_DATASET_DIR / "more_table" / "imgs"
+        texture_fd = CARROT_DATASET_DIR / "more_table" / "textures"
+        self.overlay_images_numpy = [
+            cv2.resize(cv2.cvtColor(cv2.imread(str(img_fd / k)), cv2.COLOR_BGR2RGB), (640, 480))
+            for k in model_db_table  # [H, W, 3]
+        ]  # (B) [H, W, 3]
+        self.overlay_textures_numpy = [
+            cv2.resize(cv2.cvtColor(cv2.imread(str(texture_fd / v["texture"])), cv2.COLOR_BGR2RGB), (640, 480))
+            for v in model_db_table.values()  # [H, W, 3]
+        ]  # (B) [H, W, 3]
+        self.overlay_mix_numpy = [
+            v["mix"] for v in model_db_table.values()  # []
+        ]
+        assert len(self.overlay_images_numpy) == 1
+        assert len(self.overlay_textures_numpy) == 1
+        assert len(self.overlay_mix_numpy) == 1
+
+    def _initialize_episode_pre(self, env_idx: torch.Tensor, options: dict):
+        # NOTE: this part of code is not GPU parallelized
+        b = len(env_idx)
+        assert b == self.num_envs
+
+        obj_set = options.get("obj_set", "train")
+        if obj_set == "train":
+            lc = 1
+            lc_offset = 0
+        elif obj_set == "test":
+            lc = 1
+            lc_offset = 0
+        elif obj_set == "all":
+            lc = 1
+            lc_offset = 0
+        else:
+            raise ValueError(f"Unknown obj_set: {obj_set}")
+
+        lo = 1
+        lo_offset = 0
+        lp = len(self.plate_names)
+        l1 = len(self.xyz_configs)
+        l2 = len(self.quat_configs)
+        ltt = lc * lp * lo * l1 * l2
+
+        # rand and select
+        episode_id = options.get("episode_id",
+                                 torch.randint(low=0, high=ltt, size=(b,), device=self.device))
+        episode_id = episode_id.reshape(b)
+        episode_id = episode_id % ltt
+
+        self.select_carrot_ids = episode_id // (lp * lo * l1 * l2) + lc_offset  # [b]
+        self.select_plate_ids = (episode_id // (lo * l1 * l2)) % lp
+        self.select_overlay_ids = (episode_id // (l1 * l2)) % lo + lo_offset
+        self.select_pos_ids = (episode_id // l2) % l1
+        self.select_quat_ids = episode_id % l2
+
+
 @register_env("PutOnPlateInScene25MainCarrot-v3", max_episode_steps=80, asset_download_ids=["bridge_v2_real2sim"])
 class PutOnPlateInScene25MainCarrotV3(PutOnPlateInScene25MainV3):
     def _initialize_episode_pre(self, env_idx: torch.Tensor, options: dict):
