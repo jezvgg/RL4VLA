@@ -11,6 +11,7 @@ dependencies = [
     "datasets>=4.1.0",
     "ipykernel>=6.30.1",
     "matplotlib>=3.10.6",
+    "mediapy>=1.2.4",
     "peft>=0.17.1",
     "transformers>=4.56.1",
     "trl>=0.23.0",
