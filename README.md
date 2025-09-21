@@ -1,4 +1,4 @@
-# AIRI Test Task
+# Center for Cognitive Modeling Test Task
 
 1. Log in to your [Kaggle](https://www.kaggle.com/) account
 2. Create a new Notebook by downloading [main.ipynb](https://github.com/jezvgg/RL4VLA/blob/main/main.ipynb) from the repository.
@@ -8,3 +8,4 @@
 
 
 ! Be careful, each block of code is independent and some parts of it do not need to be run if the previous ones were running.
+
