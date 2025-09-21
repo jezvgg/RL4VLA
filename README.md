@@ -9,3 +9,4 @@
 
 ! Be careful, each block of code is independent and some parts of it do not need to be run if the previous ones were running.
 
+Every metric from experiments saved on [comet ML](https://www.comet.com/jezvgg/ccm-task).
